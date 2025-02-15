@@ -8,35 +8,33 @@ import (
 	"net/http"
 )
 
-var task string = "Word"
-
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 	var tasks []Task
 	result := DB.Find(&tasks)
 	if result.Error != nil {
-		http.Error(w, "Не удалось получить задачу", http.StatusInternalServerError)
+		ErrorResponse(w, "Failed to fetch task", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tasks)
+	SuccessResponse(w, "Task fetched successfully", tasks, http.StatusOK)
 }
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		ErrorResponse(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	if task.Message == "" {
+		ErrorResponse(w, "Message cannot by empty", http.StatusBadRequest)
 		return
 	}
 	result := DB.Create(&task)
 	if result.Error != nil {
-		http.Error(w, "Не удалось создать задачу", http.StatusInternalServerError)
+		ErrorResponse(w, "Failed to create task", http.StatusCreated)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(task)
+	SuccessResponse(w, "Task created successfully", task, http.StatusCreated)
 }
 
 func PatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,24 +44,29 @@ func PatchHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&updateTask)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		ErrorResponse(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
+	if updateTask.Message == "" {
+		ErrorResponse(w, "Message cannot by empty", http.StatusBadRequest)
+		return
+	}
+
 	var task Task
 	result := DB.First(&task, id)
 	if result.Error != nil {
-		http.Error(w, "Задача не найдена", http.StatusNotFound)
+		ErrorResponse(w, "Task not found", http.StatusNotFound)
 		return
 	}
 	task.Message = updateTask.Message
 	task.IsDone = updateTask.IsDone
+
 	result = DB.Save(&task)
 	if result.Error != nil {
-		http.Error(w, "Не удалось обновить задачу", http.StatusInternalServerError)
+		ErrorResponse(w, "Failed to update task", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(task)
+	SuccessResponse(w, "Task updated successfully", task, http.StatusOK)
 }
 
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -73,11 +76,11 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	result := DB.Delete(&task, id)
 	if result.Error != nil {
-		http.Error(w, "Не удалось удалить задачу", http.StatusInternalServerError)
+		ErrorResponse(w, "Failed to delete task", http.StatusInternalServerError)
 		return
 	}
 	if result.RowsAffected == 0 {
-		http.Error(w, "Задача не найдена", http.StatusBadRequest)
+		ErrorResponse(w, "Task not found", http.StatusNotFound)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
