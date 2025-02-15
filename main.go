@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+var task string = "Word"
+
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 	var tasks []Task
 	result := DB.Find(&tasks)
@@ -35,6 +37,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	SuccessResponse(w, "Task created successfully", task, http.StatusCreated)
+
 }
 
 func PatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +61,7 @@ func PatchHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, "Task not found", http.StatusNotFound)
 		return
 	}
+
 	task.Message = updateTask.Message
 	task.IsDone = updateTask.IsDone
 
@@ -83,6 +87,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, "Task not found", http.StatusNotFound)
 		return
 	}
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
