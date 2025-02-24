@@ -1,6 +1,7 @@
 package database
 
 import (
+	"go.mod/internal/taskService"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
