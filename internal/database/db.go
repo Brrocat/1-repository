@@ -7,19 +7,20 @@ import (
 	"log"
 )
 
-var DB *gorm.DB
-
-func InitDB() {
-
-	dsn := "host=localhost user=your_user dbname=your_dbname password=your_password port=5432 sslmode=disable"
-	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func InitDB() (*gorm.DB, error) { // Теперь функция возвращает *gorm.DB и ошибку
+	dsn := "host=localhost user=postgres password=yourpassword dbname=postgres port=5432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to conect to database")
+		log.Fatal("Failed to connect to database")
+		return nil, err
 	}
-	err = DB.AutoMigrate(&taskService.Task{})
+
+	err = db.AutoMigrate(&taskService.Task{})
 	if err != nil {
 		log.Fatal("Failed to migrate database", err)
+		return nil, err
 	}
-	log.Println("Database connection and migrated successfully")
+
+	log.Println("Database connection and migration successful")
+	return db, nil
 }
