@@ -4,11 +4,15 @@ run:
 		go run ./cmd/app/main.go
 
 migrate-new:
-		migrate create -ext sql -dir ./migrations $(NAME)
+		migrate create -ext sql -dir ./migrations -seq ${NAME}
 
 migrate-up:
-		migrate -pach ./migrations -database $(DB_DSN) up
+		migrate -path ./migrations -database $(DB_DSN) up
 
 migrate-down:
-		migrate -pach ./migrations -database $(DB_DSN) down
+		migrate -path ./migrations -database $(DB_DSN) down
+
+restart:
+		 stop run
+
 
