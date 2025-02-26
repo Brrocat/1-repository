@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"go.mod/internal/database"
 	"go.mod/internal/handlers"
 	"go.mod/internal/taskService"
 	"log"
-	"net/http"
 )
 
 func main() {
@@ -22,13 +21,16 @@ func main() {
 	service := taskService.NewService(repo)
 	taskHandler := handlers.NewTaskHandler(service)
 
-	router := mux.NewRouter()
-	router.HandleFunc("/api/tasks", taskHandler.GetTasks).Methods("GET")
-	router.HandleFunc("/api/tasks", taskHandler.CreateTask).Methods("POST")
-	router.HandleFunc("/api/tasks/{id}", taskHandler.PatchTask).Methods("PATCH")
-	router.HandleFunc("/api/tasks/{id}", taskHandler.DeleteTask).Methods("DELETE")
+	e := echo.New()
 
-	// Запуск сервера
-	fmt.Println("Server is running on port 8080")
-	log.Fatal(http.ListenAndServe(":8083", router))
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.GET("/api/tasks", taskHandler.GetTask)
+	e.POST("/api/tasks", taskHandler.PostTask)
+	e.PATCH("/api/tasks/:id", taskHandler.PatchTask)
+	e.DELETE("/api/tasks/:id", taskHandler.DeleteTask)
+
+	e.Logger.Fatal(e.Start(":8083"))
+
 }

@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"encoding/json"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"go.mod/internal/taskService"
 	"net/http"
 )
@@ -15,62 +14,45 @@ func NewTaskHandler(service *taskService.Service) *TaskHandler {
 	return &TaskHandler{service: service}
 }
 
-func (h *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) GetTask(c echo.Context) error {
 	tasks, err := h.service.GetAllTasks()
 	if err != nil {
-		http.Error(w, "Failed to fetch tasks", http.StatusInternalServerError)
-		return
+		return c.JSON(http.StatusInternalServerError,
+			map[string]string{"message": "Failed to fetch tasks"})
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tasks)
+	return c.JSON(http.StatusOK, tasks)
 }
 
-func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) PostTask(c echo.Context) error {
 	var task taskService.Task
-	err := json.NewDecoder(r.Body).Decode(&task)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+	if err := c.Bind(&task); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 	}
-	err = h.service.CreateTask(&task)
-	if err != nil {
-		http.Error(w, "Failed to create task", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(task)
+	return c.JSON(http.StatusOK, task)
 }
 
-func (h *TaskHandler) PatchTask(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
+func (h *TaskHandler) PatchTask(c echo.Context) error {
+	id := c.Param("id")
 	var updateTask taskService.Task
 
-	err := json.NewDecoder(r.Body).Decode(&updateTask)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+	if err := c.Bind(&updateTask); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 	}
 
 	task, err := h.service.UpdateTask(id, &updateTask)
 	if err != nil {
-		http.Error(w, "Failed to update task", http.StatusInternalServerError)
-		return
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update task"})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(task)
+	return c.JSON(http.StatusOK, task)
 }
 
-func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
+func (h *TaskHandler) DeleteTask(c echo.Context) error {
+	id := c.Param("id")
 
-	err := h.service.DeleteTask(id)
-	if err != nil {
-		http.Error(w, "Failed to Delete task", http.StatusInternalServerError)
-		return
+	if err := h.service.DeleteTask(id); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete task"})
 	}
-	w.WriteHeader(http.StatusNoContent)
 
+	return c.NoContent(http.StatusNoContent)
 }
