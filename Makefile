@@ -20,3 +20,6 @@ gen:
 
 stop:
 		@taskkill /IM main.exe /F || echo App is not running
+
+lint:
+		golangci-lint run --out-format=colored-line-number
