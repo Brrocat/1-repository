@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"go.mod/internal/taskService"
 	"net/http"
+	"strconv"
 )
 
 type TaskHandler struct {
@@ -31,7 +32,7 @@ func (h *TaskHandler) PostTask(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create task"})
 	}
 
-	return c.JSON(http.StatusOK, task)
+	return c.JSON(http.StatusCreated, task)
 }
 
 func (h *TaskHandler) PatchTask(c echo.Context) error {
@@ -58,4 +59,18 @@ func (h *TaskHandler) DeleteTask(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *TaskHandler) GetTasksByUserID(c echo.Context) error {
+	userID := c.Param("id")
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+	}
+
+	tasks, err := h.service.GetTasksForUser(uint(id))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch tasks"})
+	}
+	return c.JSON(http.StatusOK, tasks)
 }

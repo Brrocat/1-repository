@@ -127,6 +127,24 @@ paths:
       responses:
         '204':
           description: Пользователь удалён
+  /api/users/{id}/tasks:
+    get:
+      summary: Получить задачи пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список задач пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
 components:
   schemas:
     Task:
@@ -138,10 +156,16 @@ components:
         name:
           type: string
         message:
+          type: string
+        is_done:
           type: boolean
-          required:
-            - name
-            - message
+        user_id:
+          type: integer
+          format: int64
+      required:
+        - name
+        - message
+        - user_id
     User:
       type: object
       properties:

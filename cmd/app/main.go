@@ -36,6 +36,7 @@ func main() {
 	e.POST("/api/tasks", taskHandler.PostTask)
 	e.PATCH("/api/tasks/:id", taskHandler.PatchTask)
 	e.DELETE("/api/tasks/:id", taskHandler.DeleteTask)
+	e.GET("/api/users/:id/tasks", taskHandler.GetTasksByUserID)
 
 	//Роуты для пользователей
 	e.GET("/api/users", usersHandler.GetUsers)

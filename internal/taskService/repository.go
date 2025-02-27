@@ -41,3 +41,9 @@ func (r *Repository) DeleteTask(id string) error {
 	result := r.db.Delete(&Task{}, "id = ?", id)
 	return result.Error
 }
+
+func (r *Repository) GetTasksForUser(userID uint) ([]Task, error) {
+	var tasks []Task
+	result := r.db.Where("user_id = ?", userID).Find(&tasks)
+	return tasks, result.Error
+}
