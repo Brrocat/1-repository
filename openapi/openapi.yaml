@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Task API
   version: 1.0.0
-  description: API для управления задачами
+  description: API для управления задачами и пользователями
 servers:
   - url: http://localhost:8083
     description: Local server
@@ -67,6 +67,66 @@ paths:
       responses:
         '204':
           description: Задача удалена
+  /api/users:
+    get:
+      summary: Получить всех пользователей
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Создать нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/users/{id}:
+    patch:
+      summary: Обновить пользователя по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Пользователь обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      summary: Удалить поьзователя по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Пользователь удалён
 components:
   schemas:
     Task:
@@ -82,6 +142,19 @@ components:
           required:
             - name
             - message
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
 
 
 

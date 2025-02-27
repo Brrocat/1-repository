@@ -30,6 +30,7 @@ func (r *Repository) UpdateTask(id string, task *Task) (*Task, error) {
 		return nil, result.Error
 	}
 
+	existingTask.Name = task.Name
 	existingTask.Message = task.Message
 	existingTask.IsDone = task.IsDone
 
@@ -39,6 +40,5 @@ func (r *Repository) UpdateTask(id string, task *Task) (*Task, error) {
 
 func (r *Repository) DeleteTask(id string) error {
 	result := r.db.Delete(&Task{}, "id =?", id)
-
 	return result.Error
 }
