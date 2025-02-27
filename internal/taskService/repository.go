@@ -13,7 +13,6 @@ func NewRepository(db *gorm.DB) *Repository {
 func (r *Repository) GetAllTasks() ([]Task, error) {
 	var tasks []Task
 	result := r.db.Find(&tasks)
-
 	return tasks, result.Error
 }
 
@@ -39,6 +38,6 @@ func (r *Repository) UpdateTask(id string, task *Task) (*Task, error) {
 }
 
 func (r *Repository) DeleteTask(id string) error {
-	result := r.db.Delete(&Task{}, "id =?", id)
+	result := r.db.Delete(&Task{}, "id = ?", id)
 	return result.Error
 }

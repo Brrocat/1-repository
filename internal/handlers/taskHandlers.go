@@ -17,8 +17,7 @@ func NewTaskHandler(service *taskService.Service) *TaskHandler {
 func (h *TaskHandler) GetTask(c echo.Context) error {
 	tasks, err := h.service.GetAllTasks()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError,
-			map[string]string{"message": "Failed to fetch tasks"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to fetch tasks"})
 	}
 	return c.JSON(http.StatusOK, tasks)
 }
@@ -28,6 +27,10 @@ func (h *TaskHandler) PostTask(c echo.Context) error {
 	if err := c.Bind(&task); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
 	}
+	if err := h.service.CreateTask(&task); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create task"})
+	}
+
 	return c.JSON(http.StatusOK, task)
 }
 
